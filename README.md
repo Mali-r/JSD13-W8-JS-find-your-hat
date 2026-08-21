@@ -1,7 +1,7 @@
 Thinking process
 STEP :
 1. Set up board [8x8]
-2. Random place - 'pathcharacter', 'hat', 'hole'
+2. Random position - 'pathcharacter', 'hat', 'hole'
     - the hole must not block pathcharacter to hat
     - position of 'pathcharacter', 'hat', 'hole' do not overlap.
 3. input movement 
