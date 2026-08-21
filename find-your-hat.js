@@ -141,6 +141,7 @@ class Field {
         return this.isSamePosition({ row, col }, this.hatPos);
     }
 
+    // 4. Check pathcharacter's positon
     // ผลลัพธ์ที่ method นี้ return: 'ok' | 'out' | 'hole' | 'win'
     tryMove(rowDelta, colDelta) {
         let nextRow = this.playerPos.row + rowDelta;
@@ -159,13 +160,14 @@ class Field {
         }
 
         // เดินได้ปกติ -> อัปเดต map
-        this.board[this.playerPos.row][this.playerPos.col] = pathCharacter;
+        this.board[this.playerPos.row][this.playerPos.col] = fieldCharacter;
         this.playerPos = { row: nextRow, col: nextCol };
         this.board[nextRow][nextCol] = pathCharacter;
         // จำตำแหน่งผู้เล่นด้วยสัญลักษณ์ path เดียวกัน (ไม่มีสัญลักษณ์ actor แยก)
         return 'ok';
     }
 
+// 3. movement fumction
     moveUp() {
         return this.tryMove(-1, 0);
     }
@@ -185,4 +187,77 @@ class Field {
 }
 
 let field = new Field(WIDTH, HEIGHT, HOLE_COUNT);
-field.print();
+
+const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
+function askForCommand() {
+    console.clear();
+    field.print();
+
+    rl.question(
+        "\n[w] Up | [a] Left | [s] Down | [d] Right | [r] Random | [q] Quit\n> ",
+        (answer) => {
+            const command = answer.trim().toLowerCase();
+
+            if (command === 'q') {
+                console.log('\nThanks for playing!');
+                rl.close();
+                return;
+            }
+
+            if (command === 'r') {
+                field = new Field(WIDTH, HEIGHT, HOLE_COUNT);
+                askForCommand();
+                return;
+            }
+            // 3. input movement
+            let result;
+            if (command === 'w') {
+                result = field.moveUp();
+            } else if (command === 's') {
+                result = field.moveDown();
+            } else if (command === 'a') {
+                result = field.moveLeft();
+            } else if (command === 'd') {
+                result = field.moveRight();
+            } else {
+                console.log('Please Read..');
+                askForCommand();
+                return;
+            }
+
+// 4. output pathcharacter's positon result
+            if (result === 'out') {
+                console.clear();
+                field.print();
+                console.log('\n🚫 You went out of bounds! Game over.');
+                rl.close();
+                return;
+            }
+
+            if (result === 'hole') {
+                console.clear();
+                field.print();
+                console.log('\n💀 You fell into a hole! Game over.');
+                rl.close();
+                return;
+            }
+
+            if (result === 'win') {
+                console.clear();
+                field.print();
+                console.log('\n🎉 You found the hat! You win!');
+                rl.close();
+                return;
+            }
+
+            // result === 'ok' -> เดินต่อ
+            askForCommand();
+        },
+    );
+}
+
+askForCommand();
